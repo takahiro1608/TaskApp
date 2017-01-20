@@ -152,7 +152,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         //テーブルを再読み込みする。
         //        categorySearchBar.reloadData()
         
-        let predicate = NSPredicate(format: "category ='%@', searchBar.text") // 要検索アルゴリズムの理解
+        let predicate = NSPredicate(format: "category CONTAINS %@ || title CONTAINS %@", searchBar.text! , searchBar.text!) // 検索アルゴリズムの指定
         taskArray = realm.objects(Task.self).filter(predicate)
         
         tableView.reloadData()
