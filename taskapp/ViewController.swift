@@ -10,9 +10,10 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var categorySearchBar: UISearchBar!
     
     // Realmインスタンスを取得する
     let realm = try! Realm()
@@ -20,14 +21,44 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     // DB内のタスクが格納されるリスト。
     // 日付の近い順\順でソート : 降順
     // 以降内容をアップデートするとリスト内は自動的に更新される。
-    let taskArray = try! Realm().objects(Task.self).sorted(byProperty: "date", ascending: false)
-
+    var taskArray = try! Realm().objects(Task.self).sorted(byProperty: "date", ascending: false)
+    
+    /*
+     //データ
+     let dataList = ["月刊コロコロコミック（小学館）",
+     "コロコロイチバン！（小学館）",
+     "最強ジャンプ（集英社）",
+     "Vジャンプ（集英社）",
+     "週刊少年サンデー（小学館）",
+     "週刊少年マガジン（講談社）",
+     "週刊少年ジャンプ（集英社）",
+     "週刊少年チャンピオン（秋田書店）",
+     "月刊少年マガジン（講談社）",
+     "月刊少年チャンピオン（秋田書店）",
+     "月刊少年ガンガン（スクウェア）",
+     "月刊少年エース（KADOKAWA）",
+     "月刊少年シリウス（講談社）",
+     "週刊ヤングジャンプ（集英社）",
+     "ビッグコミックスピリッツ（小学館）",
+     "週刊ヤングマガジン（講談社）"]
+     */
+    
+    
+    //検索結果配列
+    var searchResult = [String]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
         tableView.delegate = self
         tableView.dataSource = self
+        
+        categorySearchBar.delegate = self //検索バーのデリゲート方は正解？？？
+        //何も入力されていなくてもReturnキーを押せるようにする。
+        categorySearchBar.enablesReturnKeyAutomatically = false
+        //検索結果配列にデータをコピーする。
+        //        searchResult = dataList
     }
     
     override func didReceiveMemoryWarning() {
@@ -49,6 +80,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         // Cellに値を設定する.
         let task = taskArray[indexPath.row]
         cell.textLabel?.text = task.title
+        //cell.textLabel?.text = task.category
         
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
@@ -94,9 +126,36 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     print(request)
                     print("--------------------")
                 }
-            }   
+            }
             
         }
+    }
+    
+    //検索ボタン押下時の呼び出しメソッド
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        categorySearchBar.endEditing(true)
+        
+        //検索結果配列を空にする。
+        //        searchResult.removeAll()
+        
+        if(categorySearchBar.text == "") {
+            //検索文字列が空の場合はすべてを表示する。
+            //            searchResult = dataList
+        } else {
+            //検索文字列を含むデータを検索結果配列に追加する。
+            //            for data in dataList {
+            //                if data.containsString(categorySearchBar.text!) {
+            //                    searchResult.append(data)
+            //                }
+            //            }
+        }
+        //テーブルを再読み込みする。
+        //        categorySearchBar.reloadData()
+        
+        let predicate = NSPredicate(format: "category ='%@', searchBar.text") // 要検索アルゴリズムの理解
+        taskArray = realm.objects(Task.self).filter(predicate)
+        
+        tableView.reloadData()
     }
     
     // segue で画面遷移するに呼ばれる
@@ -124,7 +183,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         tableView.reloadData()
     }
     
-
+    
     
 }
 

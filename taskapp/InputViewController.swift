@@ -30,6 +30,7 @@ class InputViewController: UIViewController {
         titleTextField.text = task.title
         contentsTextView.text = task.contents
         datePicker.date = task.date as Date
+        categoryTextField.text = task.category
     }
     
     override func didReceiveMemoryWarning() {
@@ -40,6 +41,7 @@ class InputViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         try! realm.write {
             self.task.title = self.titleTextField.text!
+            self.task.category = self.categoryTextField.text //カテゴリーをレルムに保存
             self.task.contents = self.contentsTextView.text
             self.task.date = self.datePicker.date as NSDate
             self.realm.add(self.task, update: true)
@@ -79,7 +81,7 @@ class InputViewController: UIViewController {
                 print("---------------/")
             }
         }
-    }    
+    }
     func dismissKeyboard(){
         // キーボードを閉じる
         view.endEditing(true)
